@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: eventhub-api
+  profiles:
+    active: dev
+
+app:
+  name: EventHub
+  version: 1.0.0
