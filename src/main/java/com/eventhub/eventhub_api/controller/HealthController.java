@@ -10,14 +10,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class HealthController {
+    @Value("${app.version}")
+    private String version;
+
+    @Value("${app.name}")
+    private String appName;
 
     @GetMapping("/health")
     public ResponseEntity<HealthResponse> healthCheck() {
         HealthResponse response = new HealthResponse();
 
         response.setStatus("UP");
-        response.setVersion("1.0.0");
-        response.setAppName("EventHub API");
+        response.setVersion(version);
+        response.setAppName(appName);
         return ResponseEntity.ok(response);
     }
 }
