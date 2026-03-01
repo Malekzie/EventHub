@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -25,12 +26,12 @@ public class EventController {
 
     // GET event by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Event> getEventById(@PathVariable Long id) {
+    public ResponseEntity<?> getEventById(@PathVariable Long id) {
         return events.stream()
                 .filter(e -> e.getId().equals(id))
                 .findFirst()
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(404).body(Map.of("error", "Event not found with id: " + id)));
     }
 
     // POST create event
@@ -52,7 +53,7 @@ public class EventController {
 
     // PUT update event
     @PutMapping("/{id}")
-    public ResponseEntity<EventDTO> updateEvent(@PathVariable Long id, @RequestBody EventDTO dto) {
+    public ResponseEntity<?> updateEvent(@PathVariable Long id, @RequestBody EventDTO dto) {
         for (Event event : events) {
             if (event.getId().equals(id)) {
                 event.setName(dto.getName());
@@ -65,16 +66,16 @@ public class EventController {
                 return ResponseEntity.ok(dto);
             }
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(404).body(Map.of("error", "Event not found with id: " + id));
     }
 
     // DELETE event
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<?> deleteEvent(@PathVariable Long id) {
         boolean removed = events.removeIf(e -> e.getId().equals(id));
         if (removed) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(404).body(Map.of("error", "Event not found with id: " + id));
     }
 }
