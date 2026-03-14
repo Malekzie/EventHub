@@ -2,17 +2,22 @@ package com.eventhub.eventhub_api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "events")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Event {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
     public String name;
     public String description;
     public BigDecimal ticketPrice;
-    public String category;
     public Boolean isActive;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     public LocalDateTime eventDate;
@@ -21,10 +26,14 @@ public class Event {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     public LocalDateTime updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    public Category category;
+
     public Event() {
     }
 
-    public Event(Long id, String name, String description, BigDecimal ticketPrice, String category, Boolean isActive, LocalDateTime eventDate, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Event(Long id, String name, String description, BigDecimal ticketPrice, Category category, Boolean isActive, LocalDateTime eventDate, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -68,11 +77,11 @@ public class Event {
         this.ticketPrice = ticketPrice;
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
