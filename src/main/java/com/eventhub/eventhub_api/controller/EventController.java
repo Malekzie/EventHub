@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -38,18 +39,20 @@ public class EventController {
             @Parameter(description = "Filter by category name") @RequestParam(required = false) String category,
             @Parameter(description = "Minimum ticket price") @RequestParam(required = false) BigDecimal minPrice,
             @Parameter(description = "Maximum ticket price") @RequestParam(required = false) BigDecimal maxPrice,
-            @Parameter(description = "Start date filter (yyyy-MM-dd'T'HH:mm:ss)") @RequestParam(required = false) LocalDateTime startDate,
-            @Parameter(description = "End date filter (yyyy-MM-dd'T'HH:mm:ss)") @RequestParam(required = false) LocalDateTime endDate,
+            @Parameter(description = "Start date filter (yyyy-MM-dd)") @RequestParam(required = false) LocalDate startDate,
+            @Parameter(description = "End date filter (yyyy-MM-dd)") @RequestParam(required = false) LocalDate endDate,
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "Sort field and direction (e.g., title,asc)") @RequestParam(defaultValue = "id,asc") String sort) {
+            @Parameter(description = "Sort field and direction (e.g., name,asc)") @RequestParam(defaultValue = "id,asc") String sort) {
 
         String[] sortParams = sort.split(",");
         Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
                 ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
 
-        Page<EventDTO> events = eventService.findAllEvents(category, minPrice, maxPrice, startDate, endDate, pageable);
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+        Page<EventDTO> events = eventService.findAllEvents(category, minPrice, maxPrice, startDateTime, endDateTime, pageable);
         return ResponseEntity.ok(events);
     }
 
