@@ -283,11 +283,11 @@ The API uses Caffeine for local caching with a 10-minute TTL and a max of 500 en
 - **CSRF:** disabled (stateless API — no browser session cookies).
 - **CORS:** origins from `app.cors.allowed-origins` (default `http://localhost:3000`); methods `GET, POST, PUT, DELETE, PATCH, OPTIONS`.
 - **Security headers** (set in `SecurityConfig`):
-  - `X-Frame-Options: DENY`
+  - `X-Frame-Options: SAMEORIGIN` (permits the H2 console iframe in dev)
   - `X-Content-Type-Options: nosniff`
   - `X-XSS-Protection: 1; mode=block`
   - `Referrer-Policy: strict-origin-when-cross-origin`
-  - `Content-Security-Policy: default-src 'self'; frame-ancestors 'none'`
+  - `Content-Security-Policy: default-src 'self'; frame-ancestors 'self'`
   - `Strict-Transport-Security` (1 year, includeSubDomains — active over HTTPS)
 - **Input validation:** all auth DTOs use Bean Validation (`@NotBlank`, `@Email`, `@Size(min=8)`).
 - **Configuration:** JWT secret + TTL via `app.jwt.secret` / `app.jwt.expiration-ms`. Override in prod — **do not** ship the dev default.
