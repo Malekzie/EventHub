@@ -45,8 +45,9 @@ public class RegistrationService {
     }
 
     @Transactional
-    public RegistrationDTO create(CreateRegistrationDTO dto) {
+    public RegistrationDTO create(CreateRegistrationDTO dto, User currentUser) {
         Registration registration = new Registration();
+        registration.setUser(currentUser);
         registration.setRegistrationDate(LocalDateTime.now());
         registration.setStatus(Registration.Status.CONFIRMED);
 

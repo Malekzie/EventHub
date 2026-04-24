@@ -51,7 +51,10 @@ public class SecurityConfig {
                 .referrerPolicy(ref -> ref.policy(
                     ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
-                    "default-src 'self'; frame-ancestors 'self'"))
+                    "default-src 'self'; "
+                        + "script-src 'self' 'unsafe-inline'; "
+                        + "style-src 'self' 'unsafe-inline'; "
+                        + "frame-ancestors 'self'"))
                 .httpStrictTransportSecurity(hsts -> hsts
                     .includeSubDomains(true)
                     .maxAgeInSeconds(31536000))

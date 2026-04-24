@@ -2,6 +2,7 @@ package com.eventhub.eventhub_api.controller;
 
 import com.eventhub.eventhub_api.dto.CreateRegistrationDTO;
 import com.eventhub.eventhub_api.dto.RegistrationDTO;
+import com.eventhub.eventhub_api.model.User;
 import com.eventhub.eventhub_api.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,9 +47,10 @@ public class RegistrationController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new registration")
-    public ResponseEntity<RegistrationDTO> create(@Valid @RequestBody CreateRegistrationDTO dto) {
-        return ResponseEntity.status(201).body(registrationService.create(dto));
+    @Operation(summary = "Create a new registration for the authenticated user")
+    public ResponseEntity<RegistrationDTO> create(@Valid @RequestBody CreateRegistrationDTO dto,
+                                                  @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.status(201).body(registrationService.create(dto, currentUser));
     }
 
     @PatchMapping("/{id}/cancel")

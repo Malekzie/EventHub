@@ -287,7 +287,7 @@ The API uses Caffeine for local caching with a 10-minute TTL and a max of 500 en
   - `X-Content-Type-Options: nosniff`
   - `X-XSS-Protection: 1; mode=block`
   - `Referrer-Policy: strict-origin-when-cross-origin`
-  - `Content-Security-Policy: default-src 'self'; frame-ancestors 'self'`
+  - `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'` *(inline script/style allowed so the H2 console and Swagger UI render in dev)*
   - `Strict-Transport-Security` (1 year, includeSubDomains — active over HTTPS)
 - **Input validation:** all auth DTOs use Bean Validation (`@NotBlank`, `@Email`, `@Size(min=8)`).
 - **Configuration:** JWT secret + TTL via `app.jwt.secret` / `app.jwt.expiration-ms`. Override in prod — **do not** ship the dev default.
