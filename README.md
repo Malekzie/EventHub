@@ -64,6 +64,72 @@ Migrations are managed by Flyway (`src/main/resources/db/migration/`).
 
 ## API Documentation
 
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/register` | Register a new USER account; returns JWT |
+| POST | `/api/v1/auth/login` | Log in with email + password; returns JWT |
+| POST | `/api/v1/auth/password-reset-request` | Request a password reset token |
+| POST | `/api/v1/auth/password-reset` | Reset password using a valid token |
+
+**Register / Login response:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "email": "user@example.com",
+  "roles": ["ROLE_USER"]
+}
+```
+
+**Register request body:**
+
+```json
+{
+  "email": "user@example.com",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "password": "hunter2hunter2"
+}
+```
+
+**Password reset request:**
+
+```json
+{ "email": "user@example.com" }
+```
+
+Returns `{ "token": "<reset-token>" }` for local dev. Use that token here:
+
+```json
+{ "token": "<reset-token>", "newPassword": "newStrongPass1" }
+```
+
+### Using the JWT
+
+Send the token in the `Authorization` header on every protected request:
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+```
+
+Unauthenticated requests to protected endpoints return `401`. Authenticated requests lacking the required role return `403`.
+
+### Role Matrix
+
+| Area | Public | USER | ADMIN |
+|------|:------:|:----:|:-----:|
+| GET events, event details | ✓ | ✓ | ✓ |
+| GET categories | ✓ | ✓ | ✓ |
+| POST/PUT/DELETE events | | | ✓ |
+| POST/PUT/DELETE categories | | | ✓ |
+| POST registrations | | ✓ | ✓ |
+| PATCH cancel own registration | | ✓ | ✓ |
+| GET registrations by user | | ✓ | ✓ |
+| GET all registrations | | | ✓ |
+| Swagger UI, `/actuator/health` | ✓ | ✓ | ✓ |
+
 ### Categories
 
 | Method | Endpoint | Description |
@@ -209,6 +275,19 @@ Not found errors return `404`:
 
 The API uses Caffeine for local caching with a 10-minute TTL and a max of 500 entries. Caches are automatically evicted when data is created, updated, or deleted.
 
-## CORS
+## Security
 
-CORS is configured to allow requests from `http://localhost:3000` and `http://localhost:4200` with `GET`, `POST`, `PUT`, `DELETE`, and `OPTIONS` methods.
+- **Authentication:** stateless JWT (HS256). Tokens are issued by `/api/v1/auth/register` and `/api/v1/auth/login`.
+- **Password hashing:** BCrypt.
+- **Authorization:** role-based (`ROLE_USER`, `ROLE_ADMIN`) enforced in `SecurityConfig`.
+- **CSRF:** disabled (stateless API — no browser session cookies).
+- **CORS:** origins from `app.cors.allowed-origins` (default `http://localhost:3000`); methods `GET, POST, PUT, DELETE, PATCH, OPTIONS`.
+- **Security headers** (set in `SecurityConfig`):
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `X-XSS-Protection: 1; mode=block`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Content-Security-Policy: default-src 'self'; frame-ancestors 'none'`
+  - `Strict-Transport-Security` (1 year, includeSubDomains — active over HTTPS)
+- **Input validation:** all auth DTOs use Bean Validation (`@NotBlank`, `@Email`, `@Size(min=8)`).
+- **Configuration:** JWT secret + TTL via `app.jwt.secret` / `app.jwt.expiration-ms`. Override in prod — **do not** ship the dev default.
